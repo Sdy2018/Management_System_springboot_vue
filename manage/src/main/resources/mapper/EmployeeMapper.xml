@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.manage.mapper.EmployeeMapper">
+
+    <resultMap id="EmployeeResultMap" type="org.example.manage.entity.Employee">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="role" column="role" />
+        <result property="email" column="email" />
+        <result property="name" column="name" />
+        <result property="gender" column="gender" />
+        <result property="age" column="age" />
+        <result property="hireDate" column="hire_date" />
+        <result property="position" column="position" />
+        <result property="departmentId" column="department_id" />
+        <result property="departmentName" column="department_name" />
+        <result property="salary" column="salary" />
+        <result property="idCard" column="id_card" />
+        <result property="introduction" column="introduction" />
+        <result property="avatar" column="avatar" />
+    </resultMap>
+
+
+    <select id="selectById" resultMap="EmployeeResultMap" parameterType="int">
+        SELECT * FROM employee WHERE id = #{id}
+    </select>
+
+
+    <select id="selectAll" resultMap="EmployeeResultMap">
+        SELECT e.*,d.name as department_name
+        FROM employee e
+        left join department d on e.department_id=d.id
+
+    </select>
+
+    <select id="selectByName" resultMap="EmployeeResultMap" parameterType="String">
+        SELECT * FROM employee WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+<!--    <insert id="create" parameterType="org.example.manage.entity.Employee" useGeneratedKeys="true" keyProperty="employeeId">-->
+<!--#         INSERT INTO employee (username,password,name, gender, age, hire_date, position,department,salary,id_card,email )-->
+<!--#         VALUES (#{username},#{password},#{name},#{gender},#{age},#{hireDate},#{position},#{department},#{salary},#{idCard},#{email})-->
+<!--        INSERT INTO employee (name, gender, age, hire_date, position,department,salary,id_card,email )-->
+<!--        VALUES (#{name},#{gender},#{age},#{hireDate},#{position},#{department},#{salary},#{idCard},#{email})-->
+<!--    </insert>-->
+
+    <insert id="create" parameterType="org.example.manage.entity.Employee"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO employee
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">username,</if>
+            <if test="password != null">password,</if>
+            <if test="name != null">name,</if>
+            <if test="role != null">role,</if>
+            <if test="gender != null">gender,</if>
+            <if test="age != null">age,</if>
+            <if test="hireDate != null">hire_date,</if>  <!-- 动态字段 -->
+            <if test="position != null">position,</if>
+            <if test="departmentId != null">department_id,</if>
+            <if test="salary != null">salary,</if>
+            <if test="idCard != null">id_card,</if>
+            <if test="email != null">email,</if>
+            <if test="introduction != null">introduction,</if>
+            <if test="avatar != null">avatar,</if>
+
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">#{username},</if>
+            <if test="password != null">#{password},</if>
+            <if test="name != null">#{name},</if>
+            <if test="role != null">#{role},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="age != null">#{age},</if>
+            <if test="hireDate != null">#{hireDate},</if>  <!-- 参数动态绑定 -->
+            <if test="position != null">#{position},</if>
+            <if test="departmentId != null">#{departmentId},</if>
+            <if test="salary != null">#{salary},</if>
+            <if test="idCard != null">#{idCard},</if>
+            <if test="email != null">#{email},</if>
+            <if test="introduction != null">#{introduction},</if>
+            <if test="avatar != null">#{avatar},</if>
+
+        </trim>
+    </insert>
+    <update id="update" parameterType="org.example.manage.entity.Employee">
+        UPDATE employee
+        <set>
+            <if test="username != null">username=#{username},</if>
+            <if test="password != null">password=#{password},</if>
+            <if test="name != null">name=#{name},</if>
+            <if test="role != null">role=#{role},</if>
+            <if test="age != null">age=#{age},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="hireDate != null">hire_date=#{hireDate},</if>
+            <if test="position != null">position=#{position},</if>
+            <if test="departmentId != null">department_id=#{departmentId},</if>
+            <if test="salary != null">salary=#{salary},</if>
+            <if test="idCard != null">id_card=#{idCard},</if>
+            <if test="email != null">email=#{email},</if>
+            <if test="introduction != null">introduction=#{introduction},</if>
+            <if test="avatar != null">avatar=#{avatar},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM employee WHERE id = #{id}
+    </delete>
+
+    <select id="selectByUsername" resultMap="EmployeeResultMap" parameterType="String">
+        select * from employee WHERE username = #{username}
+    </select>
+
+
+    <select id="countEmployeesByDept" resultMap="DeptCountResultMap">
+        SELECT d.name as departmentName, COUNT(e.id) as count
+        FROM employee e
+                 LEFT JOIN department d ON e.department_id = d.id
+        GROUP BY d.name
+    </select>
+
+    <resultMap id="DeptCountResultMap" type="java.util.HashMap">
+        <result column="departmentName" property="departmentName"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+
+    <select id="salaryDistribution" resultType="map">
+        SELECT
+        SUM(CASE WHEN salary  &lt;10000 THEN 1 ELSE 0 END) AS below_1w_count,
+        SUM(CASE WHEN salary >= 10000 AND salary  &lt;20000 THEN 1 ELSE 0 END) AS between_1_2w_count,
+        SUM(CASE WHEN salary >= 20000 THEN 1 ELSE 0 END) AS above_2w_count,
+        CONCAT(
+        ROUND(
+        SUM(CASE WHEN salary  &lt; 10000 THEN 1 ELSE 0 END) / (SUM(CASE WHEN 1=1 THEN 1 ELSE 0 END)) * 100,
+        2
+        ), '%'
+        ) AS below_1w_ratio,
+        CONCAT(
+        ROUND(
+        SUM(CASE WHEN salary >= 10000 AND salary  &lt;20000 THEN 1 ELSE 0 END) / (SUM(CASE WHEN 1=1 THEN 1 ELSE 0 END)) * 100,
+        2
+        ), '%'
+        ) AS between_1_2w_ratio,
+        CONCAT(
+        ROUND(
+        SUM(CASE WHEN salary >= 20000 THEN 1 ELSE 0 END) / (SUM(CASE WHEN 1=1 THEN 1 ELSE 0 END)) * 100,
+        2
+        ), '%'
+        ) AS above_2w_ratio
+        FROM employee;
+    </select>
+
+
+
+
+    <!-- 主查询 -->
+    <select id="getHireStatsByYear" resultType="map">
+        WITH years AS (
+            SELECT YEAR(CURDATE()) - 9 + n AS year
+            FROM (
+                     SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+                     UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                 ) numbers
+        )
+-- 左连接员工表统计人数
+        SELECT
+            y.year,
+            COUNT(e.id) AS hire_count
+        FROM years y
+                 LEFT JOIN employee e ON y.year = YEAR(e.hire_date)
+        GROUP BY y.year
+        ORDER BY y.year;
+
+    </select>
+
+    <select id="ageStatistic" resultType="map">
+        WITH age_ranges AS (
+            SELECT '18岁-25岁' AS age_group
+            UNION ALL SELECT '26岁-30岁'
+            UNION ALL SELECT '31岁-35岁'
+            UNION ALL SELECT '大于35岁'
+        )
+        SELECT
+            ar.age_group,
+            COALESCE(COUNT(e.id), 0) AS counts  -- 无数据时补 0
+        FROM age_ranges ar
+                 LEFT JOIN employee e
+                           ON (
+                               (ar.age_group = '18岁-25岁' AND e.age BETWEEN 18 AND 25)
+                                   OR
+                               (ar.age_group = '26岁-30岁' AND e.age BETWEEN 26 AND 30)
+                                   OR
+                               (ar.age_group = '31岁-35岁' AND e.age BETWEEN 31 AND 35)
+                                   OR
+                               (ar.age_group = '大于35岁' AND e.age > 35)
+                               )
+        GROUP BY ar.age_group;
+    </select>
+
+
+    <select id="checkEmail">
+        select * from employee
+        WHERE email=#{email} and id!=#{id}
+    </select>
+
+    <select id="checkIdCard">
+        select * from employee
+        WHERE id_card=#{idCard} and id!=#{id}
+    </select>
+
+<!--    <select id="selectByUserName" resultMap="EmployeeResultMap" parameterType="org.example.manage.entity.Employee">-->
+<!--        select * from employee WHERE username = ${username}-->
+<!--    </select>-->
+
+
+</mapper>

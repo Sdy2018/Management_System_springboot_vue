@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.manage.mapper.ArticleMapper">
+
+    <resultMap id="ArticleResultMap" type="org.example.manage.entity.Article">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="image" column="image" />
+        <result property="describe" column="describe" />
+        <result property="author" column="author" />
+
+    </resultMap>
+
+    <select id="selectById" resultMap="ArticleResultMap" parameterType="int">
+        SELECT * FROM article WHERE id = #{id}
+    </select>
+
+
+    <select id="selectAll" resultMap="ArticleResultMap">
+        SELECT * FROM article
+    </select>
+
+    <select id="selectByTitleLike" resultMap="ArticleResultMap" parameterType="String">
+        SELECT * FROM article WHERE title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
+<!--    <insert id="create" parameterType="org.example.manage.entity.Employee" useGeneratedKeys="true" keyProperty="employeeId">-->
+<!--#         INSERT INTO employee (username,password,name, gender, age, hire_date, position,department,salary,id_card,email )-->
+<!--#         VALUES (#{username},#{password},#{name},#{gender},#{age},#{hireDate},#{position},#{department},#{salary},#{idCard},#{email})-->
+<!--        INSERT INTO employee (name, gender, age, hire_date, position,department,salary,id_card,email )-->
+<!--        VALUES (#{name},#{gender},#{age},#{hireDate},#{position},#{department},#{salary},#{idCard},#{email})-->
+<!--    </insert>-->
+
+    <insert id="create" parameterType="org.example.manage.entity.Article"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="content != null">content,</if>
+            <if test="image != null">image,</if>
+            <if test="describe != null"> `describe`,</if>
+            <if test="author != null">author,</if>
+        </trim>
+
+
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="image != null">#{image},</if>
+            <if test="describe != null">#{describe},</if>
+            <if test="author != null">#{author},</if>
+        </trim>
+    </insert>
+    <update id="update" parameterType="org.example.manage.entity.Article">
+        UPDATE article
+        <set>
+            <if test="title != null">title=#{title},</if>
+            <if test="content != null">content=#{content},</if>
+            <if test="image != null">image=#{image},</if>
+            <if test="describe != null"> `describe`=#{describe},</if>
+            <if test="author != null">author=#{author},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM article WHERE id = #{id}
+    </delete>
+
+    <select id="selectByTitle" resultMap="ArticleResultMap" parameterType="String">
+        select * from article WHERE title = #{title}
+    </select>
+
+<!--    <select id="selectByUserName" resultMap="EmployeeResultMap" parameterType="org.example.manage.entity.Employee">-->
+<!--        select * from employee WHERE username = ${username}-->
+<!--    </select>-->
+
+
+</mapper>
